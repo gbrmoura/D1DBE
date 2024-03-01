@@ -28,9 +28,13 @@ namespace Calculos
             return (base_triangulo * altura) / 2;
         }
 
-        public double Calcular(List<double> cord1, List<double> cord2, List<double> cord3)
+        public double Calcular((int x1, int y1) vector1, (int x2, int y2) vector2, (int x3, int y3) vector3)
         {
-            return 0; // TODO: Fazer este calculo
+            int x = (1 * vector2.y2 * vector3.x3) + (vector1.x1 * 1 * vector3.y3) + (vector1.y1 * vector2.x2 * 1);
+            int y = (vector1.x1 * vector2.y2 * 1) + (vector1.y1 * 1 * vector3.x3) + (1 * vector2.x2 * vector3.y3) ;
+            double area = 0.5 * (x - y);
+
+            return area < 0 ? area * (-1) : area;
         }
 
         public string Calcular(string param)

@@ -32,7 +32,10 @@ internal class Program
                 Console.WriteLine($"CEP: {cliente.CEP}");
 
                 Console.WriteLine("Deseja continuar cadastrando clientes?");
-                Console.Write("Y /")
+                Console.Write("Y / N: ");
+                string option = Console.ReadLine();
+
+                continua = option == "Y" ? true : false;
             }
             
         } 

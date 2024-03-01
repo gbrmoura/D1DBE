@@ -29,9 +29,24 @@ namespace _4_Operacoes
             return x / y;
         }
 
-        public double Raiz(double radicando, double indice )
+        public double RaizQuadrada(double value)
         {
-            return 0;
+            if (value < 0)
+                throw new ArgumentException("Não é possivel calcular raiz quadrada");
+
+            if (value == 0)
+                return 0;
+
+            double estimated = value / 2;
+            double nw = (estimated + value / estimated) / 2;
+            
+            while (Math.Abs(nw - estimated) > 0.00001)
+            {
+                estimated = nw;
+                nw = (estimated + value / estimated) / 2;
+            }
+
+            return nw;
         }
 
         public long Fatorial(long x)

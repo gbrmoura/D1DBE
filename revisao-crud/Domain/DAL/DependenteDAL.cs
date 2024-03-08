@@ -3,7 +3,7 @@ using MySql.Data.MySqlClient;
 
 namespace Domain.DAL
 {
-    public class DependenteDAL
+    public class DependenteDAL : BaseDAL<Dependente>
     {
         private ApplicationContext _context;
 
@@ -12,7 +12,7 @@ namespace Domain.DAL
             _context = context;
         }
 
-        public void Insert(Dependente value)
+        public override void Insert(Dependente value)
         {   
             string query = "INSERT INTO Dependente";
             query += "(Nome, CPF, Sexo, CEP, Endereco, Telefone, DataNascimento, IdFuncionario, IsDeleted)";
@@ -41,7 +41,7 @@ namespace Domain.DAL
             }
         }
 
-        public Dependente Select(int id)
+        public override Dependente Select(int id)
         {
             Dependente? dependente = null;
             string query = $"SELECT * FROM Dependente WHERE id=@Id";
@@ -54,9 +54,13 @@ namespace Domain.DAL
                 cmd.Parameters.AddWithValue("@Id", id);
                 cmd.ExecuteNonQuery();
 
-
                 MySqlDataReader reader = cmd.ExecuteReader();
-                reader.Read();
+
+                if (!reader.Read())
+                {
+                    _context.CloseConnection();
+                    return null;
+                }
 
                 dependente = new Dependente
                 {
@@ -78,7 +82,7 @@ namespace Domain.DAL
             return dependente;
         }
 
-        public List<Dependente> Select()
+        public override List<Dependente> Select()
         {
             List<Dependente> dependentes = new List<Dependente>();
             string query = $"SELECT * FROM Dependente WHERE IsDeleted=FALSE LIMIT 50";
@@ -116,11 +120,11 @@ namespace Domain.DAL
             return dependentes;
         }
 
-        public void Update(int id, Dependente value)
+        public override void Update(int id, Dependente value)
         {
-            string query = "UPDATE Dependente SET";
+            string query = "UPDATE Dependente SET ";
             query += $"Nome=@Nome, CPF=@CPF, Sexo=@Sexo, CEP=@CEP, Endereco=@Endereco, ";
-            query += $"Telefone=@Telefone, DataNascimento=@DataNascimento, IdFuncionario=@IdFuncionario";
+            query += $"Telefone=@Telefone, DataNascimento=@DataNascimento, IdFuncionario=@IdFuncionario ";
             query += $"WHERE id=@Id";
 
             if (_context.OpenConnection())
@@ -143,7 +147,8 @@ namespace Domain.DAL
                 _context.CloseConnection();
             }
         }
-        public void Delete(int id)
+
+        public override void Delete(int id)
         {
             string query = $"UPDATE Dependente SET IsDeleted=@IsDeleted WHERE id=@Id";
 

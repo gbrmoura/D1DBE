@@ -4,7 +4,7 @@ using MySql.Data.MySqlClient;
 
 namespace Domain.DAL
 {
-    public class FuncionarioDAL
+    public class FuncionarioDAL : BaseDAL<Funcionario>
     {
         private ApplicationContext _context;
 
@@ -13,7 +13,7 @@ namespace Domain.DAL
             _context = context;
         }
 
-        public void Insert(Funcionario value) 
+        public override void Insert(Funcionario value) 
         {
             string query = "INSERT INTO Funcionario";
             query += "(Matricula, Salario, DataAdmissao, Nome, CPF, Sexo, CEP, Endereco, Telefone, DataNascimento, IsDeleted)";
@@ -44,7 +44,7 @@ namespace Domain.DAL
             }
         }
 
-        public Funcionario Select(int id) 
+        public override Funcionario Select(int id) 
         {
             Funcionario? funcionario = null;
             string query = $"SELECT * FROM Funcionario WHERE id=@Id";
@@ -57,9 +57,13 @@ namespace Domain.DAL
                 cmd.Parameters.AddWithValue("@Id", id);
                 cmd.ExecuteNonQuery();
 
-
                 MySqlDataReader reader = cmd.ExecuteReader();
-                reader.Read();
+
+                if (!reader.Read())
+                {
+                    _context.CloseConnection();
+                    return null;
+                }
 
                 funcionario = new Funcionario
                 {
@@ -83,7 +87,7 @@ namespace Domain.DAL
             return funcionario;
         }
 
-        public List<Funcionario> Select()
+        public override List<Funcionario> Select()
         {
             List<Funcionario> funcionarios = new List<Funcionario>();
             string query = $"SELECT * FROM Funcionario WHERE IsDeleted=FALSE LIMIT 50";
@@ -123,12 +127,12 @@ namespace Domain.DAL
             return funcionarios;
         }
 
-        public void Update(int id, Funcionario value) 
+        public override void Update(int id, Funcionario value) 
         {
-            string query = "UPDATE Funcionario SET";
+            string query = "UPDATE Funcionario SET ";
             query += $"Matricula=@Matricula, Salario=@Salario, DataAdmissao=@DataAdmissao, ";
             query += $"Nome=@Nome, CPF=@CPF, Sexo=@Sexo, CEP=@CEP, Endereco=@Endereco, ";
-            query += $"Telefone=@Telefone, DataNascimento=@DataNascimento";
+            query += $"Telefone=@Telefone, DataNascimento=@DataNascimento ";
             query += $"WHERE id=@Id";
             
             if (_context.OpenConnection())
@@ -153,15 +157,35 @@ namespace Domain.DAL
                 _context.CloseConnection();
             }
         }
-        public void Delete(int id)
+        public override void Delete(int id)
         {
             string query = $"UPDATE Funcionario SET IsDeleted=@IsDeleted WHERE id=@Id";
+            string queryDependente = "UPDATE Dependente SET IsDeleted=@IsDeleted WHERE idFuncionario=@Id";
+            string queryCargo = "UPDATE Cargo SET IsDeleted=@IsDeleted WHERE idFuncionario=@Id";
 
             if (_context.OpenConnection())
             {
                 MySqlCommand cmd = new MySqlCommand();
                 cmd.CommandText = query;
                 cmd.Connection = _context.GetConnection();
+
+                cmd.Parameters.AddWithValue("@Id", id);
+                cmd.Parameters.AddWithValue("@IsDeleted", true);
+
+                cmd.ExecuteNonQuery();
+
+                // Delete Dependentes em Cascata
+                cmd.CommandText = queryDependente;
+                cmd.Parameters.Clear();
+
+                cmd.Parameters.AddWithValue("@Id", id);
+                cmd.Parameters.AddWithValue("@IsDeleted", true);
+
+                cmd.ExecuteNonQuery();
+
+                // Delete Cargos em Cascata
+                cmd.CommandText = queryCargo;
+                cmd.Parameters.Clear();
 
                 cmd.Parameters.AddWithValue("@Id", id);
                 cmd.Parameters.AddWithValue("@IsDeleted", true);

@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace Domain.DAL
 {
-    public class CargoDAL
+    public class CargoDAL : BaseDAL<Cargo>
     {
         private ApplicationContext _context;
 
@@ -17,12 +17,12 @@ namespace Domain.DAL
             _context = context;
         }
 
-        public void Insert(Cargo value)
+        public override void Insert(Cargo value)
         {
             string query = "INSERT INTO Cargo";
-            query += "(Nome, Descricao, DataInicio, DataFim, IdFuncionario)";
+            query += "(Nome, Descricao, DataInicio, DataFim, IdFuncionario, IsDeleted)";
             query += "VALUES";
-            query += "(@Nome, @Descricao, @DataInicio, @DataFim, @IdFuncionario)";
+            query += "(@Nome, @Descricao, @DataInicio, @DataFim, @IdFuncionario, @IsDeleted)";
 
             if (_context.OpenConnection())
             {
@@ -43,7 +43,7 @@ namespace Domain.DAL
             }
         }
 
-        public Cargo Select(int id)
+        public override Cargo Select(int id)
         {
             Cargo? cargo = null;
             string query = $"SELECT * FROM Cargo WHERE id=@Id";
@@ -56,9 +56,13 @@ namespace Domain.DAL
                 cmd.Parameters.AddWithValue("@Id", id);
                 cmd.ExecuteNonQuery();
 
-
                 MySqlDataReader reader = cmd.ExecuteReader();
-                reader.Read();
+
+                if (!reader.Read())
+                {
+                    _context.CloseConnection();
+                    return null;
+                }
 
                 cargo = new Cargo
                 {
@@ -77,7 +81,7 @@ namespace Domain.DAL
             return cargo;
         }
 
-        public List<Cargo> Select()
+        public override List<Cargo> Select()
         {
             List<Cargo> cargos = new List<Cargo>();
             string query = $"SELECT * FROM Cargo WHERE IsDeleted=FALSE LIMIT 50";
@@ -111,11 +115,11 @@ namespace Domain.DAL
             return cargos;
         }
 
-        public void Update(int id, Cargo value)
+        public override void Update(int id, Cargo value)
         {
-            string query = "UPDATE Cargo SET";
+            string query = "UPDATE Cargo SET ";
             query += $"Nome=@Nome, Descricao=@Descricao, DataInicio=@DataInicio, DataFim=@DataFiim, ";
-            query += $"IsDeleted=@IsDeleted, IdFuncionario=@IdFuncionario";
+            query += $"IdFuncionario=@IdFuncionario ";
             query += $"WHERE id=@Id";
 
             if (_context.OpenConnection())
@@ -129,14 +133,13 @@ namespace Domain.DAL
                 cmd.Parameters.AddWithValue("@DataInicio", value.DataInicio);
                 cmd.Parameters.AddWithValue("@DataFim", value.DataFim);
                 cmd.Parameters.AddWithValue("@IdFuncionario", value.IdFuncionario);
-                cmd.Parameters.AddWithValue("@IsDeleted", false);
                 cmd.Parameters.AddWithValue("@Id", id);
 
                 cmd.ExecuteNonQuery();
                 _context.CloseConnection();
             }
         }
-        public void Delete(int id)
+        public override void Delete(int id)
         {
             string query = $"UPDATE Cargo SET IsDeleted=@IsDeleted WHERE id=@Id";
 

@@ -19,9 +19,6 @@ CREATE TABLE Funcionario (
 
 CREATE TABLE Dependente (
     Id INT PRIMARY KEY AUTO_INCREMENT,
-    Matricula INT,
-    Salario FLOAT,
-    DataAdimissao DATE,
     Nome VARCHAR(110),
     CPF VARCHAR(14),
     Sexo VARCHAR(1),

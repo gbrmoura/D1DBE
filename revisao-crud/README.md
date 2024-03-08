@@ -6,8 +6,14 @@ Esta lista de exercícios foi elaborada com o objetivo de auxiliar na revisão d
 
 Na lista foi utilizado(s) os seguintes Programa(s)/Ferramenta(s):
 
+- [C#](https://dotnet.microsoft.com/pt-br/languages/csharp)
 - [.NET 8](https://dotnet.microsoft.com/pt-br/download/dotnet/8.0) - v8.0.2
 - [MySQL](https://www.mysql.com/downloads/) - v8.0.36
+
+Na lista foi utilizado as seguintes Biblioteca(s):
+
+- [ConsoleTables](https://www.nuget.org/packages/ConsoleTables/) - v2.6.1
+- [MySQL.Data](https://www.nuget.org/packages/MySql.Data) - v8.3.0
 
 ## Como Criar o Banco de Dados
 
